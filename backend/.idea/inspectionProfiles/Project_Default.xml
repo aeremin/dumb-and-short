@@ -12,6 +12,7 @@
         <function importPath="fmt" name="Errorf" />
         <function importPath="errors" name="Join" />
         <function importPath="fmt" name="Fprint" />
+        <function importPath="fmt" name="Fprintf" />
       </functions>
     </inspection_tool>
   </profile>
