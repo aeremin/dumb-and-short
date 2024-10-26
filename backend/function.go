@@ -10,11 +10,10 @@ import (
 )
 
 func init() {
-   functions.HTTP("HelloHTTP", helloHTTP)
+   functions.HTTP("API", api)
 }
 
-// helloHTTP is an HTTP Cloud Function with a request parameter.
-func helloHTTP(w http.ResponseWriter, r *http.Request) {
+func api(w http.ResponseWriter, r *http.Request) {
   mux.ServeHTTP(w, r)
   return
   var d struct {
