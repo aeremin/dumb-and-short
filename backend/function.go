@@ -5,10 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"log"
 	"net/http"
-
-	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
 var client *firestore.Client
@@ -31,11 +30,10 @@ func api(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	var err error
-	client, err = firestore.NewClient(ctx, "alice-larp")
+	client, err = firestore.NewClientWithDatabase(ctx, firestore.DetectProjectID, "dumb-and-short")
 	if err != nil {
 		log.Fatalf("Failed to create Firestore client: %v", err)
 	}
-
 	functions.HTTP("API", api)
 }
 
@@ -93,6 +91,9 @@ func redirect(w http.ResponseWriter, r *http.Request) {
 		Url: doc.Url,
 	}
 
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		fmt.Fprintf(w, "Can't encode a response: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
 }
