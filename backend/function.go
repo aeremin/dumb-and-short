@@ -69,6 +69,9 @@ type CreateResponse struct {
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
+	if handleCors(w, r) {
+		return
+	}
 	var b CreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 		fmt.Fprintf(w, "Can't decode request: %v", err)
