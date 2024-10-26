@@ -13,7 +13,7 @@ jobs:
         with:
           working-directory: frontend
       - name: Build
-        run: npm build
+        run: npm run build
         working-directory: frontend
       - uses: actions-hub/gcloud@412.0.0
         env:
