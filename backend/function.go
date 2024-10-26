@@ -38,6 +38,20 @@ func init() {
 	functions.HTTP("API", api)
 }
 
+func handleCors(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Max-Age", "3600")
+		w.WriteHeader(http.StatusNoContent)
+		return true
+	}
+	// Set CORS headers for the main request.
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	return false
+}
+
 type MetadataDocument struct {
 	NextId int `firestore:"next_id"`
 }
@@ -116,6 +130,9 @@ type RedirectResponse struct {
 }
 
 func redirect(w http.ResponseWriter, r *http.Request) {
+	if handleCors(w, r) {
+		return
+	}
 	var b RedirectRequest
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 		fmt.Fprintf(w, "Can't decode request: %v", err)
