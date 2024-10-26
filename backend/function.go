@@ -14,6 +14,21 @@ import (
 var client *firestore.Client
 var ctx = context.Background()
 
+const urlsCollection = "urls"
+
+var mux = newMux()
+
+func newMux() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/create", create)
+	mux.HandleFunc("/redirect", redirect)
+	return mux
+}
+
+func api(w http.ResponseWriter, r *http.Request) {
+	mux.ServeHTTP(w, r)
+}
+
 func init() {
 	var err error
 	client, err = firestore.NewClient(ctx, "alice-larp")
@@ -32,16 +47,13 @@ type UrlDocument struct {
 	Url string `firestore:"url"`
 }
 
-func api(w http.ResponseWriter, r *http.Request) {
-	mux.ServeHTTP(w, r)
-}
-
 func create(w http.ResponseWriter, r *http.Request) {
 	var b body
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 		fmt.Fprint(w, "Shit is broken!")
 		return
 	}
+
 }
 
 func redirect(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +63,7 @@ func redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := client.Collection("urls").Doc(b.Id).Get(ctx)
+	d, err := client.Collection(urlsCollection).Doc(b.Id).Get(ctx)
 	if err != nil {
 		fmt.Fprint(w, "Shit is broken 2!")
 		return
@@ -62,13 +74,4 @@ func redirect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, doc.Url, 301)
-}
-
-var mux = newMux()
-
-func newMux() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/create", create)
-	mux.HandleFunc("/redirect", redirect)
-	return mux
 }
