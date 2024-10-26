@@ -21,7 +21,7 @@ var mux = newMux()
 func newMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/create", create)
-	mux.HandleFunc("/redirect", redirect)
+	mux.HandleFunc("/resolve", resolve)
 	return mux
 }
 
@@ -124,19 +124,19 @@ func create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
-type RedirectRequest struct {
+type ResolveRequest struct {
 	Id string `json:"id"`
 }
 
-type RedirectResponse struct {
+type ResolveResponse struct {
 	Url string `json:"url"`
 }
 
-func redirect(w http.ResponseWriter, r *http.Request) {
+func resolve(w http.ResponseWriter, r *http.Request) {
 	if handleCors(w, r) {
 		return
 	}
-	var b RedirectRequest
+	var b ResolveRequest
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 		fmt.Fprintf(w, "Can't decode request: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -156,7 +156,7 @@ func redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := RedirectResponse{
+	resp := ResolveResponse{
 		Url: doc.Url,
 	}
 
