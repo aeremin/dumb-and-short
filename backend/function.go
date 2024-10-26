@@ -8,6 +8,7 @@ import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 var client *firestore.Client
@@ -37,6 +38,10 @@ func init() {
 	functions.HTTP("API", api)
 }
 
+type MetadataDocument struct {
+	NextId int `firestore:"next_id"`
+}
+
 type UrlDocument struct {
 	Url string `firestore:"url"`
 }
@@ -52,10 +57,54 @@ type CreateResponse struct {
 func create(w http.ResponseWriter, r *http.Request) {
 	var b CreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
-		fmt.Fprint(w, "Shit is broken!")
+		fmt.Fprintf(w, "Can't decode request: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	resp := CreateResponse{}
+
+	err := client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		metadataDocRef := client.Collection(urlsCollection).Doc("metadata")
+		metaSnap, err := tx.Get(metadataDocRef)
+		if err != nil {
+			return err
+		}
+
+		metadata := MetadataDocument{}
+		if err := metaSnap.DataTo(&metadata); err != nil {
+			return err
+		}
+
+		doc := UrlDocument{
+			Url: b.Url,
+		}
+
+		if err := tx.Create(client.Collection(urlsCollection).Doc(strconv.Itoa(metadata.NextId)), doc); err != nil {
+			return err
+		}
+
+		metadata.NextId++
+		if err := tx.Set(metadataDocRef, metadata); err != nil {
+			return err
+		}
+
+		resp.Id = strconv.Itoa(metadata.NextId - 1)
+
+		return nil
+	})
+
+	if err != nil {
+		fmt.Fprintf(w, "Internal error: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		fmt.Fprintf(w, "Can't encode a response: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
 }
 
 type RedirectRequest struct {
