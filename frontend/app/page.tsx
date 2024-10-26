@@ -9,6 +9,12 @@ import FormControl from 'react-bootstrap/FormControl';
 import {useState} from "react";
 
 import {create} from "@/api"
+import {redirect} from "next/navigation";
+
+async function createAndRedirect(url: string) {
+  const id = await create(url);
+  redirect(`/created/${id}`);
+}
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -21,7 +27,7 @@ export default function Home() {
           <InputGroup>
             <FormControl type="string" value={url} onChange={(e) => setUrl(e.target.value)} />
             <InputGroup>
-              <Button variant="success" onClick={() => create(url)}>
+              <Button variant="success" onClick={() => createAndRedirect(url)}>
                 Create
               </Button>
             </InputGroup>

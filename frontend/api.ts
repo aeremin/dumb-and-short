@@ -2,9 +2,9 @@ import axios from 'axios';
 
 const BACKEND_URL = 'https://dumb-and-short-815779847222.europe-west6.run.app'
 
-export async function create(url: string) {
+export async function create(url: string): Promise<string> {
   const response = await axios.post(BACKEND_URL + '/create', {url});
-  return response.data;
+  return response.data.id;
 }
 
 export async function resolve(id: string): Promise<string> {
