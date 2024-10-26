@@ -1,6 +1,5 @@
-'use client'
-
 import 'bootstrap/dist/css/bootstrap.min.css';
+
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -9,15 +8,16 @@ import FormControl from 'react-bootstrap/FormControl';
 import {useState} from "react";
 
 import {create} from "@/api"
-import {redirect} from "next/navigation";
+import {NextRouter, useRouter} from "next/router";
 
-async function createAndRedirect(url: string) {
+async function createAndRedirect(router: NextRouter, url: string) {
   const id = await create(url);
-  redirect(`/created/${id}`);
+  await router.push(`/created/${id}`);
 }
 
 export default function Home() {
   const [url, setUrl] = useState("");
+  const router = useRouter()
 
   return (
     <div>
@@ -27,7 +27,7 @@ export default function Home() {
           <InputGroup>
             <FormControl type="string" value={url} onChange={(e) => setUrl(e.target.value)} />
             <InputGroup>
-              <Button variant="success" onClick={() => createAndRedirect(url)}>
+              <Button variant="success" onClick={() => createAndRedirect(router, url)}>
                 Create
               </Button>
             </InputGroup>
