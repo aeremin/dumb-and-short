@@ -39,16 +39,20 @@ func init() {
 	functions.HTTP("API", api)
 }
 
-type body struct {
-	Id string `json:"id"`
-}
-
 type UrlDocument struct {
 	Url string `firestore:"url"`
 }
 
+type CreateRequest struct {
+	Url string `json:"url"`
+}
+
+type CreateResponse struct {
+	Id string `json:"id"`
+}
+
 func create(w http.ResponseWriter, r *http.Request) {
-	var b body
+	var b CreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 		fmt.Fprint(w, "Shit is broken!")
 		return
@@ -56,22 +60,39 @@ func create(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type RedirectRequest struct {
+	Id string `json:"id"`
+}
+
+type RedirectResponse struct {
+	Url string `json:"url"`
+}
+
 func redirect(w http.ResponseWriter, r *http.Request) {
-	var b body
+	var b RedirectRequest
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
-		fmt.Fprint(w, "Shit is broken!")
+		fmt.Fprintf(w, "Can't decode request: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	d, err := client.Collection(urlsCollection).Doc(b.Id).Get(ctx)
 	if err != nil {
-		fmt.Fprint(w, "Shit is broken 2!")
+		fmt.Fprintf(w, "Can't find a document: %v", err)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	var doc UrlDocument
 	if err := d.DataTo(&doc); err != nil {
-		fmt.Fprint(w, "Shit is broken 3!")
+		fmt.Fprintf(w, "Can't parse a document: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	http.Redirect(w, r, doc.Url, 301)
+	resp := RedirectResponse{
+		Url: doc.Url,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
 }
