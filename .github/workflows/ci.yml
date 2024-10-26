@@ -1,0 +1,20 @@
+name: CI
+on: 
+  push:
+  schedule:
+  - cron:  '0 3 * * *'
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build and deploy
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bahmutov/npm-install@v1
+      - run: npm build
+      - uses: actions-hub/gcloud@412.0.0
+        env:
+          PROJECT_ID: alice-larp
+          APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS  }}
+          CLI: gsutil
+        with:
+          args: -h "Cache-Control:no-cache,max-age=0" cp -r build/* gs://url.aerem.in
