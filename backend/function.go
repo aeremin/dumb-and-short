@@ -1,49 +1,47 @@
 package helloworld
 
 import (
-  "encoding/json"
-  "fmt"
-  "html"
-  "net/http"
+	"encoding/json"
+	"fmt"
+	"net/http"
 
-  "github.com/GoogleCloudPlatform/functions-framework-go/functions"
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
 func init() {
-   functions.HTTP("API", api)
+	functions.HTTP("API", api)
+}
+
+type body struct {
+	Id string `json:"id"`
 }
 
 func api(w http.ResponseWriter, r *http.Request) {
-  mux.ServeHTTP(w, r)
-  return
-  var d struct {
-    Name string `json:"name"`
-  }
-  if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-    fmt.Fprint(w, "Shit is broken!")
-    return
-  }
-  if d.Name == "" {
-    fmt.Fprint(w, "Hello, anonymous!")
-    return
-  }
-  fmt.Fprintf(w, "Hello, %s!", html.EscapeString(d.Name))
+	mux.ServeHTTP(w, r)
+	return
 }
 
-
-func hello(w http.ResponseWriter, r *http.Request) {
-   fmt.Fprint(w,"Hello World!")
+func create(w http.ResponseWriter, r *http.Request) {
+	var b body
+	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+		fmt.Fprint(w, "Shit is broken!")
+		return
+	}
 }
 
-func login(w http.ResponseWriter, r *http.Request) {
-   fmt.Fprint(w,"Login from /subroute/login")
+func redirect(w http.ResponseWriter, r *http.Request) {
+	var b body
+	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+		fmt.Fprint(w, "Shit is broken!")
+		return
+	}
 }
 
 var mux = newMux()
 
 func newMux() *http.ServeMux {
-   mux := http.NewServeMux()
-   mux.HandleFunc("/hello", hello)
-   mux.HandleFunc("/subroute/login", login)
-   return mux
+	mux := http.NewServeMux()
+	mux.HandleFunc("/create", create)
+	mux.HandleFunc("/redirect", redirect)
+	return mux
 }
