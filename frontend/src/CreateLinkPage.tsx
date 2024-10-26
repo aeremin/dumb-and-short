@@ -6,18 +6,17 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 
 import {useState} from "react";
+import {create} from "./api";
+import {NavigateFunction, useNavigate} from "react-router-dom";
 
-import {create} from "@/api"
-import {NextRouter, useRouter} from "next/router";
-
-async function createAndRedirect(router: NextRouter, url: string) {
+async function createAndRedirect(navigate: NavigateFunction, url: string) {
   const id = await create(url);
-  await router.push(`/created/${id}`);
+  navigate(`/created/${id}`)
 }
 
-export default function Home() {
+export default function CreateLinkPage() {
   const [url, setUrl] = useState("");
-  const router = useRouter()
+  const navigate = useNavigate();
 
   return (
     <div>
@@ -27,7 +26,7 @@ export default function Home() {
           <InputGroup>
             <FormControl type="string" value={url} onChange={(e) => setUrl(e.target.value)} />
             <InputGroup>
-              <Button variant="success" onClick={() => createAndRedirect(router, url)}>
+              <Button variant="success" onClick={() => createAndRedirect(navigate, url)}>
                 Create
               </Button>
             </InputGroup>
