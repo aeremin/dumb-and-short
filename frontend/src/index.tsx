@@ -8,6 +8,7 @@ import {
 import CreatedPage from "./CreatedPage";
 import CreateLinkPage from "./CreateLinkPage";
 import {resolve} from "./api";
+import {Container} from "react-bootstrap";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Container>
+      <RouterProvider router={router} />
+    </Container>
   </React.StrictMode>
 );
