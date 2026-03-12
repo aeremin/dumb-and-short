@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = 'https://dumb-and-short-815779847222.europe-west6.run.app'
+const BACKEND_URL = 'https://europe-west6-dumb-and-short.cloudfunctions.net'
 
 export async function create(url: string): Promise<string> {
   const response = await axios.post(BACKEND_URL + '/create', {url});
